@@ -11,8 +11,8 @@ var fps = 60;
 var map = {
 	x: 0,
 	y: 0,
-	width: 1280,
-	height: 640
+	width: 1000,
+	height: 563
 };
 
 var enemy = {
@@ -101,7 +101,7 @@ function drawDist(){
 function msg(){
 	ctx.fillStyle = "#FFF";
 	ctx.font = "20px Trebuchet MS";
-	ctx.fillText("Click to start!", map.x + 570, map.y + 30);
+	ctx.fillText("Click to start!", map.x + 450, map.y + 30);
 }
 
 function drawScore(){
