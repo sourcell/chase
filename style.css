@@ -1,0 +1,9 @@
+*{
+	margin: 0px;
+}
+
+#map{
+	border: 1px solid #000;
+	background-color: #0AF;
+	cursor: none;
+}
