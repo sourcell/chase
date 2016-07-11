@@ -7,6 +7,7 @@ var dist;
 var score = 0;
 var started = false;
 var fps = 60;
+var evadeOn = false;
 
 var map = {
 	x: 0,
@@ -43,6 +44,16 @@ document.onmousemove = function(e){
 	}
 }
 
+document.onkeydown = function(e){
+	if(e.keyCode == 45){
+		if(evadeOn == false){
+			evadeOn = true;
+		}else{
+			evadeOn = false;
+		}
+	}
+}
+
 document.onclick = function(e){
 	if(started == false){
 		started = true;
@@ -75,17 +86,17 @@ function drawLine(){
 	ctx.stroke();
 }
 
-function getDist(){
-	if(player.x > enemy.x){
-		x = player.x - enemy.x;
+function getDist(a, b){
+	if(a.x > b.x){
+		x = a.x - b.x;
 	}else{
-		x = enemy.x - player.x;
+		x = b.x - a.x;
 	}
 
-	if(player.y > enemy.y){
-		y = player.y - enemy.y;
+	if(a.y > b.y){
+		y = a.y - b.y;
 	}else{
-		y = enemy.y - player.y;
+		y = b.y - a.y;
 	}
 
 	dist = Math.round(Math.sqrt(x*x + y*y));
@@ -95,7 +106,7 @@ function getDist(){
 function drawDist(){
 	ctx.fillStyle = "#000";
 	ctx.font = "20px Trebuchet MS";
-	ctx.fillText("Distance: " + getDist() + "px", map.x + 20, map.y + 30);
+	ctx.fillText("Distance: " + getDist(player, enemy) + "px", map.x + 20, map.y + 30);
 }
 
 function msg(){
@@ -114,32 +125,32 @@ function clear(){
 	ctx.clearRect(map.x, map.y, map.width, map.height);
 }
 
-function enemyMoving(){
+function follow(followed, follower){
 	if(started == false){return}
 
-	if(player.x > enemy.x){
-		if(player.x - enemy.x > enemy.speed){
-			enemy.x += enemy.speed;
+	if(followed.x > follower.x){
+		if(followed.x - follower.x > follower.speed){
+			follower.x += follower.speed;
 		}
 	}else{
-		if(enemy.x - player.x > enemy.speed){
-			enemy.x -= enemy.speed;
+		if(follower.x - followed.x > follower.speed){
+			follower.x -= follower.speed;
 		}	
 	}
 
-	if(player.y > enemy.y){
-		if(player.y - enemy.y > enemy.speed){
-			enemy.y += enemy.speed;
+	if(followed.y > follower.y){
+		if(followed.y - follower.y > follower.speed){
+			follower.y += follower.speed;
 		}	
 	}else{
-		if(enemy.y - player.y > enemy.speed){
-			enemy.y -= enemy.speed;
+		if(follower.y - followed.y > follower.speed){
+			follower.y -= follower.speed;
 		}
 	}
 }
 
 function hitCheck(){
-	if(getDist() < player.size + enemy.size){
+	if(getDist(player, enemy) < player.size + enemy.size){
 		alert("You have died. Score: " + score);
 		score = 0;
 		enemy.x = map.width/2;
@@ -183,6 +194,37 @@ function incSpeed(){
 	}
 }
 
+/*function random(min, max){
+	var random = Math.round(Math.random()*max);
+
+	if(random < min){
+		random += min - random + Math.round(Math.random() * (max - min));
+		return random;
+	}else{
+		return random;
+	}
+}*/
+
+function random(min, max){
+	return Math.floor(Math.random()*(max-min+1)+min);
+}
+
+function evade(who, what){
+	if(getDist(player, enemy) < player.size*2 + enemy.size*2){
+		if(enemy.x < map.width/2){
+			player.x = random(enemy.x + enemy.size*2 + player.size*2, map.width - player.size);
+		}else{
+			player.x = random(map.x + player.size, enemy.x - enemy.size*2 + player.size*2);
+		}
+
+		if(enemy.y < map.height/2){
+			player.y = random(enemy.y + enemy.size*2 + player.size*2, map.height - player.size);
+		}else{
+			player.y = random(map.y + player.size, enemy.y - enemy.size*2 + player.size*2);
+		}
+	}
+}
+
 setInterval(function(){
 	clear();
 	drawEnemy();
@@ -190,7 +232,8 @@ setInterval(function(){
 	drawDist();
 	drawScore();
 	if(started == false){msg();}
-	enemyMoving();
+	follow(player, enemy);
+	if(evadeOn == true){evade(player, enemy);}
 	hitCheck();
 }, 1000/fps);
 
